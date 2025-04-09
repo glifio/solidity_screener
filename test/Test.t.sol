@@ -11,8 +11,8 @@ contract ContractTest is Test {
     Attacker public attacker;
     RewardToken public rewardToken;
     uint256 donationEpochs = 10;
-    uint256 donationAmount = 100e18;
-
+    uint256 donationAmount = 1000e18;
+    uint256 rewardPoolAmount = 100e18;
 
     function setUp() public {
         address owner = makeAddr("owner");
@@ -22,7 +22,7 @@ contract ContractTest is Test {
         // deploy the vulnerable contract from the owner account
         c = new VulnerableContract(rewardToken, donationEpochs);
         // mint 1000 reward tokens to the donation contract
-        rewardToken.mint(address(c), donationAmount);
+        rewardToken.mint(address(c), rewardPoolAmount);
 
         vm.stopPrank();
 
@@ -30,13 +30,13 @@ contract ContractTest is Test {
 
         // fund the contract
         address donator = makeAddr("donator");
-        vm.deal(donator, 10 ether);
+        vm.deal(donator, donationAmount);
         vm.prank(donator);
-        c.donate{value: 10 ether}(address(attacker));
+        c.donate{value: donationAmount}(address(attacker));
     }
 
     // The prewritten tests here should pass
-    function test_Drain() public {
+    function testDrain() public {
         uint256 bal = address(c).balance;
         assertGt(bal, 0, "Contract should have a balance before draining");
 
